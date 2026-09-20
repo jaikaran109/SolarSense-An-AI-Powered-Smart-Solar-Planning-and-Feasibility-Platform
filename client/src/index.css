@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+/* Custom UI Utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.gradient-eco {
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #14b8a6 100%);
+}
+
+.gradient-sun {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.gradient-card-border {
+  border-image: linear-gradient(to bottom right, #10b981, #06b6d4) 1;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Leaflet & Leaflet-Draw UI Custom Styling */
+.leaflet-container {
+  font-family: inherit;
+  background-color: #020617;
+  z-index: 10;
+}
+
+.leaflet-bar {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+}
+
+.leaflet-bar a {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #1e293b !important;
+  transition: all 0.15s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: #1e293b !important;
+  color: #10b981 !important;
+}
+
+.leaflet-draw-tooltip {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  color: #f8fafc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  font-size: 12px !important;
+  padding: 6px 10px !important;
+}
+
+.leaflet-draw-tooltip:before {
+  border-right-color: rgba(15, 23, 42, 0.9) !important;
+}
+
