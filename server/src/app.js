@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
+const fs = require('fs');
 
 const solarRoutes = require('./routes/solar.routes');
 const financialRoutes = require('./routes/financial.routes');
@@ -11,6 +13,10 @@ const assistantRoutes = require('./routes/assistant.routes');
 const { getDatabaseStatus } = require('./config/db');
 
 const app = express();
+
+// Render (and most PaaS proxies) forwards client IPs via X-Forwarded-For.
+// express-rate-limit refuses to run behind a proxy unless this is set.
+app.set('trust proxy', 1);
 
 // ==========================================
 // 1. HTTP Security Headers (Helmet)
@@ -44,9 +50,17 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      // Allow requests with no origin (like mobile apps, curl, server-to-server, same-origin)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*') || origin.startsWith('http://localhost:')) {
+      if (
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes('*') ||
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:') ||
+        // On Render the frontend may live on *.onrender.com — reflect any https
+        // origin when no explicit allowlist is configured (same as dev default).
+        (process.env.ALLOWED_ORIGINS ? false : origin.startsWith('https://'))
+      ) {
         return callback(null, true);
       }
       return callback(new Error(`CORS blocked for origin: ${origin}`));
@@ -107,8 +121,42 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/installers', installerRoutes);
 app.use('/api/assistant', assistantRoutes);
 
-// 404 Handler
+// ==========================================
+// 5. Optional static frontend (single-service Render deploy)
+// Serves client/dist when it exists (copied in at build time).
+// API routes + /api/health above take precedence.
+// ==========================================
+const clientDistCandidates = [
+  // Standard single-service layout: server/ and client/ are siblings
+  path.join(__dirname, '..', '..', 'client', 'dist'),
+  // Fallback if built files are copied into the server package
+  path.join(__dirname, '..', 'public'),
+];
+
+const clientDistDir = clientDistCandidates.find(
+  (dir) => fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html'))
+);
+
+if (clientDistDir) {
+  app.use(express.static(clientDistDir, { maxAge: '1d', index: false }));
+  // SPA fallback — any non-/api GET serves index.html.
+  // NOTE: plain middleware (no '*' route pattern) so this works on
+  // Express 4 and Express 5 (path-to-regexp v8 rejects '*' strings).
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
+    return res.sendFile(path.join(clientDistDir, 'index.html'));
+  });
+  console.log(`🖥️  Serving frontend static build from: ${clientDistDir}`);
+}
+
+// 404 Handler (API + unmatched routes when no static build is present)
 app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: `Route ${req.originalUrl} not found on SolarSense server.` });
+  }
+  if (clientDistDir) {
+    return res.sendFile(path.join(clientDistDir, 'index.html'));
+  }
   res.status(404).json({ error: `Route ${req.originalUrl} not found on SolarSense server.` });
 });
 

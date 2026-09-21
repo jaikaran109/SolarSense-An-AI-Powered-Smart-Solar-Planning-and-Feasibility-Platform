@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE = '/api';
+// In dev the Vite proxy forwards /api -> localhost:5000.
+// In production set VITE_API_URL to the backend origin (e.g. https://solarsense-api.onrender.com)
+// for a split deploy. Leave it empty for a single-service deploy (same origin).
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '') + '/api';
 
 const client = axios.create({
   baseURL: API_BASE,

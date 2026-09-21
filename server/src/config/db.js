@@ -63,40 +63,80 @@ let memoryStore = {
 
 const dns = require('dns');
 
+// Disconnect with a hard cap: if the initial mongoose.connect() is still
+// stuck (e.g. an Atlas SRV/DNS stall), a plain `await mongoose.disconnect()`
+// waits for that pending connection forever and the server never starts
+// listening. The race guarantees connectDB() always resolves so the server
+// boots into resilient in-memory mode.
+async function safeDisconnect() {
+  try {
+    await Promise.race([
+      mongoose.disconnect(),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]);
+  } catch (e) { /* ignore */ }
+}
+
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
 
-  // Set reliable public DNS for SRV record resolution on Windows
-  try {
-    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
-  } catch (e) {
-    // Ignore if not supported in environment
+  // Guard against the whole boot hanging: cap TOTAL time spent here.
+  // Render kills the deploy if the port isn't listening in time, and
+  // Atlas SRV/DNS stalls are the #1 cause. Fail fast -> in-memory mode.
+  const withTimeout = (promise, ms, label) =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+      ),
+    ]);
+
+  const tryConnect = async (connUri, timeoutMs) => {
+    mongoose.set('strictQuery', false);
+    await withTimeout(
+      mongoose.connect(connUri, { serverSelectionTimeoutMS: timeoutMs }),
+      timeoutMs + 2000,
+      `MongoDB connect (${connUri.split('@')[1] || 'local'})`
+    );
+  };
+
+  // Set reliable public DNS for SRV record resolution on local Windows dev only.
+  // NEVER override DNS on Render/Heroku/etc — it breaks the platform resolver
+  // and can take down Atlas SRV lookups + health checks.
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+    } catch (e) {
+      // Ignore if not supported in environment
+    }
   }
 
   if (!uri || uri.includes('example') || uri === 'mongodb://localhost:27017/solarsense') {
-    // Try to connect to localhost if available, or fall back to resilient in-memory
+    // No real URI configured — try localhost FAST, then in-memory.
+    // (Render has no local mongo, so this must fail in ~2s, not hang.)
     try {
-      mongoose.set('strictQuery', false);
-      const connUri = uri || 'mongodb://localhost:27017/solarsense';
-      await mongoose.connect(connUri, { serverSelectionTimeoutMS: 2000 });
+      const connUri = uri && !uri.includes('example') ? uri : 'mongodb://localhost:27017/solarsense';
+      await tryConnect(connUri, 2000);
       isConnected = true;
       console.log('✅ MongoDB Connected successfully to local/remote instance.');
       return;
     } catch (err) {
       console.warn('⚠️  MongoDB connection skipped or unavailable (' + err.message + ').');
       console.log('🚀 Running in resilient in-memory datastore mode. All features will work seamlessly.');
+      // Make extra sure no half-open connection keeps retrying in background
+      await safeDisconnect();
       isConnected = false;
       return;
     }
   }
 
   try {
-    mongoose.set('strictQuery', false);
-    await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
+    await tryConnect(uri, 8000);
     isConnected = true;
     console.log('✅ Connected to MongoDB Atlas cluster.');
   } catch (err) {
     console.warn('⚠️  MongoDB connection error (' + err.message + '). Falling back to in-memory store.');
+    await safeDisconnect();
     isConnected = false;
   }
 }

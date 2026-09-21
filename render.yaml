@@ -1,0 +1,64 @@
+services:
+  # ── Option A: single Web Service (recommended, free tier friendly) ──
+  # Backend + frontend from one URL. Frontend is built and served by Express.
+  # NOTE: rootDir is the REPO ROOT (not `server`) so the build can reach
+  # both `server/` and `client/`. All commands use --prefix accordingly.
+  - type: web
+    name: solarsense
+    runtime: node
+    plan: free
+    buildCommand: npm --prefix server install && npm --prefix client install && npm --prefix client run build
+    startCommand: npm --prefix server start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.18.1
+      # No ALLOWED_ORIGINS needed for single-service (same-origin requests).
+      # ── Optional ──
+      # - key: MONGODB_URI
+      #   sync: false # set in dashboard: MongoDB Atlas connection string
+      # - key: GEMINI_API_KEY
+      #   sync: false
+      # - key: VITE_MAPBOX_TOKEN
+      #   sync: false
+
+  # ── Option B: split deploy (uncomment to use instead of Option A) ──
+  # Backend API as Web Service + frontend as Static Site.
+  # 1. Comment out / delete the service above.
+  # 2. Uncomment both services below.
+  # 3. Set VITE_API_URL on the static site to the backend URL
+  #    (e.g. https://solarsense-api.onrender.com) and ALLOWED_ORIGINS
+  #    on the backend to the frontend URL.
+  # - type: web
+  #   name: solarsense-api
+  #   runtime: node
+  #   plan: free
+  #   rootDir: server
+  #   buildCommand: npm install
+  #   startCommand: npm start
+  #   healthCheckPath: /api/health
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+  #     - key: NODE_VERSION
+  #       value: 20.18.1
+  #     - key: ALLOWED_ORIGINS
+  #       value: https://solarsense-frontend.onrender.com
+  #     # - key: MONGODB_URI
+  #     #   sync: false
+  #     # - key: GEMINI_API_KEY
+  #     #   sync: false
+  # - type: web
+  #   name: solarsense-frontend
+  #   env: static # <-- this is what makes it a Static Site (not `runtime:`)
+  #   plan: free
+  #   rootDir: client
+  #   buildCommand: npm install && npm run build
+  #   staticPublishPath: ./dist
+  #   envVars:
+  #     - key: VITE_API_URL
+  #       value: https://solarsense-api.onrender.com
+  #     # - key: VITE_MAPBOX_TOKEN
+  #     #   sync: false
