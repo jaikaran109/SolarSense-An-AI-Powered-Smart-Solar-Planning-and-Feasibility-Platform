@@ -8,7 +8,6 @@ const financialRoutes = require('./routes/financial.routes');
 const reportRoutes = require('./routes/report.routes');
 const installerRoutes = require('./routes/installer.routes');
 const assistantRoutes = require('./routes/assistant.routes');
-const authRoutes = require('./routes/auth.routes');
 const { getDatabaseStatus } = require('./config/db');
 
 const app = express();
@@ -72,16 +71,6 @@ const globalLimiter = rateLimit({
 });
 app.use('/api', globalLimiter);
 
-// Auth Limiter: 20 login/register attempts per 15 minutes per IP
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
-});
-app.use('/api/auth', authLimiter);
-
 // AI Assistant Limiter: 45 queries per 15 minutes to prevent API quota drain
 const aiAssistantLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -117,7 +106,6 @@ app.use('/api/financial', financialRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/installers', installerRoutes);
 app.use('/api/assistant', assistantRoutes);
-app.use('/api/auth', authRoutes);
 
 // 404 Handler
 app.use((req, res) => {

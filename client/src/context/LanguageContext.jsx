@@ -10,10 +10,8 @@ const translations = {
     startEstimation: 'Start Estimation',
     howItWorks: 'How It Works',
     topBrands: 'Top Brands & Roadmap',
-    signIn: 'Sign In',
-    optional: 'Optional',
+    navBrands: 'Top Brands',
     calculateFeasibility: 'Calculate Feasibility',
-    logout: 'Logout',
 
     // Top Brands & Roadmap Page
     brandsBadge: 'Ranked by 15,000+ Indian Homeowner & EPC Reviews',
@@ -290,10 +288,8 @@ const translations = {
     startEstimation: 'अनुमान शुरू करें',
     howItWorks: 'यह कैसे काम करता है',
     topBrands: 'शीर्ष कंपनियाँ एवं रोडमैप',
-    signIn: 'लॉग इन करें',
-    optional: 'वैकल्पिक',
+    navBrands: 'टॉप ब्रांड्स',
     calculateFeasibility: 'सोलर रिपोर्ट बनाएं',
-    logout: 'लॉगआउट',
 
     // Top Brands & Roadmap Page
     brandsBadge: '15,000+ भारतीय उपभोक्ताओं व EPC रिव्यूज पर आधारित रैंकिंग',

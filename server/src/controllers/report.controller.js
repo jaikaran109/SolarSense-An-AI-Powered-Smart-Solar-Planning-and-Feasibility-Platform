@@ -75,7 +75,7 @@ exports.getReportById = async (req, res) => {
 exports.listReports = async (req, res) => {
   try {
     const { isConnected } = getDatabaseStatus();
-    const userId = req.user ? req.user._id : req.query.userId;
+    const userId = req.query.userId;
 
     if (isConnected) {
       const filter = userId ? { userId } : {};

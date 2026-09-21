@@ -44,12 +44,21 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float': 'float 6s ease-in-out infinite',
+        'spin-slow': 'spin-slow 9s linear infinite',
+        'fade-in': 'fade-in 0.25s ease-out both',
       },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-8px)' },
-        }
+        },
+        'spin-slow': {
+          to: { transform: 'rotate(360deg)' },
+        },
+        'fade-in': {
+          from: { opacity: '0', transform: 'translateY(-6px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
       }
     },
   },

@@ -73,11 +73,6 @@ const reportSchema = new mongoose.Schema(
       lat: { type: Number },
       lng: { type: Number },
       address: { type: String, default: 'Rooftop Site Location' }
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null
     }
   },
   {

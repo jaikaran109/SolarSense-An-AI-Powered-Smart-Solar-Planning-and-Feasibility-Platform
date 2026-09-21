@@ -20,14 +20,14 @@ Instead of traditional "area-first" solar tools that assume the user wants to bl
 10. **Bilingual Localization (English & हिंदी)**: Seamless one-click language toggle across the entire application.
 11. **Contextual AI Solar Assistant**: Built-in AI chat consultant that contextually explains sizing, PM Surya Ghar subsidies, and regional climate adaptations (powered by Google Gemini with smart local fallback).
 12. **Recommended Local Installers**: Seeded directory of verified EPC solar contractors with a "Request Quote" lead generation modal.
-13. **Enterprise Security & Live MongoDB Atlas**: Password hashing with `bcryptjs` (10 salt rounds), `helmet` CSP/HTTP headers, and `express-rate-limit` DDoS/brute-force defense.
+13. **Hardened API Security**: `helmet` CSP/HTTP headers, `express-rate-limit` DDoS defense, and a live MongoDB Atlas database with automated resilient in-memory fallback.
 
 ---
 
 ## 🛠️ Technology Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts, Turf.js, Leaflet / Mapbox, Canvas Confetti.
-- **Backend**: Node.js, Express.js, MongoDB Atlas (with automated resilient in-memory fallback), Mongoose, bcryptjs, Helmet, Express-Rate-Limit.
+- **Backend**: Node.js, Express.js, MongoDB Atlas (with automated resilient in-memory fallback), Mongoose, Helmet, Express-Rate-Limit.
 - **AI Layer**: Isolated service supporting Google Gemini API with smart context-aware solar advisor fallback.
 
 ---
@@ -39,7 +39,7 @@ solar-ai-platform/
 ├── client/                      # React frontend (Vite)
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── common/          # AuthModal, UI elements
+│   │   │   ├── common/          # Shared UI elements
 │   │   │   ├── layout/          # Navbar, Footer, StepWizardBar
 │   │   │   ├── consumption/     # Steps 1, 2, 3: Consumption & Target Sizing
 │   │   │   ├── map/             # Step 4: Turf.js & Satellite Map Roof Check
@@ -52,7 +52,6 @@ solar-ai-platform/
 │   │   │   └── Estimate.jsx     # Multi-step guided wizard
 │   │   ├── context/
 │   │   │   ├── EstimationContext.jsx
-│   │   │   ├── AuthContext.jsx
 │   │   │   └── LanguageContext.jsx
 │   │   ├── services/
 │   │   │   └── api.js

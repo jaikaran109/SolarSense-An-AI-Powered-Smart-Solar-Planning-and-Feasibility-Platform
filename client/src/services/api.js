@@ -10,15 +10,6 @@ const client = axios.create({
   timeout: 15000
 });
 
-// Attach optional auth token from localStorage if present
-client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('solarsense_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 export const solarAPI = {
   // Step 1: Process consumption & presets
   processConsumption: async (data) => {
