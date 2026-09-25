@@ -9,7 +9,7 @@ const solarRoutes = require('./routes/solar.routes');
 const financialRoutes = require('./routes/financial.routes');
 const reportRoutes = require('./routes/report.routes');
 const installerRoutes = require('./routes/installer.routes');
-const assistantRoutes = require('./routes/assistant.routes');
+const assistantRoutes = require('./routes/assistant.routes'); 
 const { getDatabaseStatus } = require('./config/db');
 
 const app = express();
